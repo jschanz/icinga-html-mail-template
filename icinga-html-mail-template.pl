@@ -31,7 +31,8 @@
 #									a query to nagiosbp will be sent to integrate the business process state dependent on nagiosbp_state
 #									in the message body.
 #	2012-03-06		0.2.1		->	host notifications added
-#	2013-02-27		0.2.2		->	LASTSERVICEINKNOWN in LASTSERVICEUNKNOWN changed
+#	2013-03-27		0.2.2		->	LASTSERVICEINKNOWN in LASTSERVICEUNKNOWN changed
+#	2013-12-31		0.2.3		->	bugfix for notificationtype detection
 #
 #
 use warnings;
@@ -196,8 +197,15 @@ $icinga_processstarttime			= getLocaltimeFromUnixtime($icinga_processstarttime);
 
 # check if host- or service notification an define subject for mail
 my $subject;
+
+# detect notification type by keyword (icinga servicestate)
 my $notificationtype;
-if ($icinga_servicestate ne "\$") {
+if (
+		($icinga_servicestate eq "UNKNOWN") or 
+		($icinga_servicestate eq "CRITICAL") or 
+		($icinga_servicestate eq "WARNING") or (
+		$icinga_servicestate eq "OK")
+	) {
 	# service notification
 	$subject = "[Icinga] $icinga_notificationtype: $icinga_hostname $icinga_servicedisplayname is $icinga_servicestate";
 	$notificationtype = "SERVICE";
